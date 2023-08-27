@@ -1,0 +1,140 @@
+#include<bits/stdc++.h>
+#define pb push_back
+#define endl '\n'
+#define F first
+#define S second
+#define forq(i,a,b) for(int i = a ; i <= b ; i++ )
+#define qrof(i,a,b) for(int i = b ; i >= a ; i--)
+#define Fast ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0)
+#define sc(x) scanf("%lld",&x)
+#define Ok(x) x == true ?cout<<"YES"<<endl : cout<<"NO"<<endl;
+using namespace std;
+typedef long long ll;
+const int N = 2e5+3;
+const int M = 1000000007;
+const int LOG = 22;
+const ll INF = 1e18;
+///////////////////////////////////////////////////////////////////
+struct tt
+{
+    ll F, S;
+    tt() {}
+    tt(ll a,ll b)
+    {
+        F = a;
+        S = b;
+    }
+    bool operator < (const tt & n) const
+    {
+        return F < n.F;
+    }
+
+};
+ll poww(ll x, ll n, ll mod)
+{
+    if(x == 0) return 0 ;
+    if(x == 1) return 1;
+    if(n == 0) return 1 ;
+    if(n == 1) return x%mod ;
+    ll Ans = poww(x, n/2, mod)%mod ;
+    Ans = (Ans * Ans)%mod;
+    if(n%2) return (Ans *x) %mod ;
+    return Ans ;
+}
+ll inv(ll x,ll mod)
+{
+    return poww(x, mod-2, mod)%mod ;
+}
+ll Gcd(ll x,ll y)
+{
+    return y ? Gcd(y,x%y) : x ;
+}
+ll fact[N];
+void fac()
+{
+    fact[0]  =  1;
+    for( ll i = 1 ; i < N ; i++ )
+    {
+        fact[i] = (fact[i-1]*i)%M;
+    }
+    return;
+}
+ll C(ll a, ll b)
+{
+    if(a-b<0)return 0LL;
+    ll res = (fact[a]*inv(fact[b],M))%M;
+    res = res*inv(fact[a-b],M)%M;
+    return res;
+}
+bool viss[2*N];
+void seive()
+{
+    viss[1] = 0 ;
+    viss[0] = 1;
+    for( int i = 2 ; i < N ; i++ )
+    {
+        if(!viss[i])
+        {
+            for( int j = i ; j < N ; j += i  )
+            {
+                viss[j] = 1;
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////
+int k;
+ll dp[32][100][2][100];
+//here there is a trick : k <= 10000 but we don't need to store all k because the maximum sum digits is about 100
+vector<int>digits;
+ll sol( int pos, int sum, bool small , ll rem)
+{
+    ll &ret = dp[pos][sum][small][rem];
+    if(pos == digits.size())
+    {
+        if( rem % k == 0 and sum % k == 0 ) return 1;
+        return 0;
+    }
+    if( ret != -1 )return ret;
+    ret = 0;
+    int Limit = 9;
+    if( small == 0 )
+    {
+        Limit = digits[pos];
+    }
+    for( int d = 0 ; d <= Limit ; d++ )
+    {
+        int xsmall = small;
+        if( small == 0 && d < Limit )xsmall = 1;
+        ret += sol( pos + 1 , sum + d , xsmall ,( rem * 10 + d )%k);
+    }
+    return ret;
+}
+int solve(int b)
+{
+    digits.clear();
+    memset(dp , -1 , sizeof dp);
+    while(b>0)
+    {
+        digits.push_back(b%10);
+        b/=10;
+    }
+    reverse(digits.begin(), digits.end());
+    int res = sol(0, 0, 0, 0 );
+    return res;
+}
+int main()
+{
+    Fast;
+    int Test = 1 ;
+    cin >> Test;
+Start:
+    for(int test = 1 ; test <= Test ; test++ )
+    {
+        int a , b;
+        cin >>  a >> b >> k;
+        cout<<sol(b) - sol(a-1)<<endl;
+    }
+    return 0 ;
+}
